@@ -148,8 +148,8 @@ html,body{min-height:100%;background:#f0f2f5;font-family:-apple-system,BlinkMacS
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 var SURL      = 'https://script.google.com/macros/s/AKfycbwXH5R3tFAzwrmRV0CsRGKiuZlHurDhuHnTLIj19D5Q1k2sUwwTqwjnSSl6oFepBVM9/exec';
-var LOCAL_PIN = '1234';
-var LIDERES   = ["Sergio Villalobos", "Franco Zabala", "Administrador"];   // nombres autorizados
+var LOCAL_PIN = 'Tsbsa2026';
+var LIDERES   = ["Sergio Villalobos", "Administrador"];   // nombres autorizados
 var ON_FILE   = (window.location.protocol === 'file:');
 
 // ── ASSETS ──────────────────────────────────────────────────────────────────
@@ -178,41 +178,30 @@ document.getElementById('tab-ind').addEventListener('click', function(){ gTab('i
 // ── LOGIN ────────────────────────────────────────────────────────────────────
 function doLogin() {
   var nombre = document.getElementById('inp-lider').value.trim();
-  if (!nombre) { showToast('\u26a0 Ingres\u00e1 tu nombre completo'); return; }
+  var pin    = document.getElementById('inp-pin').value.trim();
 
-  // Verificar que el nombre esté en la lista de autorizados
+  if (!nombre) { showToast('\u26a0 Ingres\u00e1 tu nombre completo'); return; }
+  if (!pin)    { showToast('\u26a0 Ingres\u00e1 el PIN'); return; }
+
+  // 1. Verificar PIN localmente
+  if (pin !== LOCAL_PIN) {
+    showToast('\u26a0 PIN incorrecto');
+    document.getElementById('login-note').textContent = '\u26a0 PIN incorrecto. Intent\u00e1 de nuevo.';
+    document.getElementById('login-note').className = 'login-note warn';
+    return;
+  }
+
+  // 2. Verificar que el nombre est\u00e9 en la lista de autorizados
   var autorizado = LIDERES.some(function(n){ return n.toLowerCase() === nombre.toLowerCase(); });
   if (!autorizado) {
-    showToast('\u26a0 Nombre no autorizado. Contact\u00e1 al administrador.');
+    showToast('\u26a0 Nombre no autorizado');
     document.getElementById('login-note').textContent = '\u26a0 "' + nombre + '" no est\u00e1 en la lista de l\u00edderes.';
-    document.getElementById('login-note').className   = 'login-note warn';
+    document.getElementById('login-note').className = 'login-note warn';
     return;
   }
 
-  // Si es file://, entrar directo (sin red para verificar PIN)
-  if (ON_FILE) {
-    enterApp(nombre);
-    return;
-  }
-
-  // Online: verificar PIN contra servidor
-  var pin = document.getElementById('inp-pin').value.trim();
-  if (!pin) { showToast('\u26a0 Ingres\u00e1 el PIN'); return; }
-
-  var btn = document.getElementById('btn-ingresar');
-  btn.textContent = 'Verificando...'; btn.disabled = true;
-
-  api({action:'verificarPin', pin:pin}, function(err, res){
-    btn.textContent = 'Ingresar al panel'; btn.disabled = false;
-    if (err) {
-      // JSONP timeout o error — usar PIN local como respaldo
-      if (pin === LOCAL_PIN) { enterApp(nombre); return; }
-      showToast('⚠ No se pudo verificar. Verificá el PIN.');
-      return;
-    }
-    if (!res || !res.ok) { showToast('⚠ PIN incorrecto'); return; }
-    enterApp(nombre);
-  });
+  // 3. Ingresar
+  enterApp(nombre);
 }
 
 function enterApp(nombre) {
