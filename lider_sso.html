@@ -131,34 +131,37 @@ html,body{min-height:100%;background:#f0f2f5;font-family:-apple-system,BlinkMacS
 <div class="toast" id="toast"></div>
 
 <script>
-// ── CONFIGURACION ─────────────────────────────────────────────────────────────
+// -- CONFIGURACION -------------------------------------------------------------
 var SURL   = 'https://script.google.com/macros/s/AKfycbwXH5R3tFAzwrmRV0CsRGKiuZlHurDhuHnTLIj19D5Q1k2sUwwTqwjnSSl6oFepBVM9/exec';
 var PIN    = '1234';
 var LISTA  = ["Sergio Villalobos", "Franco Zabala", "Administrador"];
 
-// ── ASSETS ────────────────────────────────────────────────────────────────────
+// -- ASSETS --------------------------------------------------------------------
 var IMGS = JSON.parse(document.getElementById('app-imgs').textContent);
 
-// ── ESTADO ────────────────────────────────────────────────────────────────────
+// -- ESTADO --------------------------------------------------------------------
 var lider = '';
 var todas = [];
 var _cbIdx = 0;
 var TIPOS  = {acto:'Acto inseguro',cond:'Condición insegura',pos:'Reconocimiento positivo',cuasi:'Cuasi accidente'};
 var TIPO_B = {acto:'b-acto',cond:'b-cond',pos:'b-pos',cuasi:'b-cuasi'};
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
+// -- LOGIN ---------------------------------------------------------------------
 document.getElementById('btn-entrar').onclick = function() {
   var nombre = document.getElementById('inp-nombre').value.trim();
   var pin    = document.getElementById('inp-pin').value.trim();
   var msg    = document.getElementById('login-msg');
 
-  if (!nombre) { showToast('⚠ Ingresá tu nombre'); return; }
-  if (!pin)    { showToast('⚠ Ingresá el PIN'); return; }
+  // Show debug info so user can see what's happening
+  msg.textContent = 'v7: nombre="' + nombre + '" pin_len=' + pin.length;
+  msg.style.color = '#888';
+
+  if (!nombre) { msg.textContent='Error: nombre vacío'; msg.style.color='#c62828'; return; }
+  if (!pin)    { msg.textContent='Error: PIN vacío'; msg.style.color='#c62828'; return; }
 
   if (pin !== PIN) {
-    msg.textContent = '⚠ PIN incorrecto. El PIN es numérico.';
+    msg.textContent = 'PIN incorrecto. PIN en sistema: ' + PIN.length + ' dígitos. Ingresaste: ' + pin.length;
     msg.style.color = '#c62828';
-    showToast('⚠ PIN incorrecto');
     return;
   }
 
@@ -167,12 +170,12 @@ document.getElementById('btn-entrar').onclick = function() {
   });
 
   if (!ok) {
-    msg.textContent = '⚠ "' + nombre + '" no está autorizado.';
+    msg.textContent = '"' + nombre + '" no encontrado en lista de ' + LISTA.length + ' líderes';
     msg.style.color = '#c62828';
-    showToast('⚠ Nombre no autorizado');
     return;
   }
 
+  // Todo OK - ingresar
   lider = nombre;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -184,7 +187,7 @@ document.getElementById('inp-pin').onkeydown = function(e) {
   if (e.key === 'Enter') document.getElementById('btn-entrar').click();
 };
 
-// ── API (JSONP) ───────────────────────────────────────────────────────────────
+// -- API (JSONP) ---------------------------------------------------------------
 function api(params, cb) {
   var cbName = '_cb' + (++_cbIdx);
   var url = SURL + '?callback=' + cbName;
@@ -204,7 +207,7 @@ function api(params, cb) {
   document.head.appendChild(sc);
 }
 
-// ── CARGAR ────────────────────────────────────────────────────────────────────
+// -- CARGAR --------------------------------------------------------------------
 function cargar() {
   document.getElementById('c-pend').innerHTML  = '<div class="loading">&#8987; Cargando tarjetas...</div>';
   document.getElementById('c-todas').innerHTML = '<div class="loading">&#8987; Cargando...</div>';
