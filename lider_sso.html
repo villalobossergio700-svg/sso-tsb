@@ -146,6 +146,7 @@ html,body{min-height:100%;background:#f0f2f5;font-family:-apple-system,BlinkMacS
 <div class="toast" id="toast"></div>
 
 <script>
+// v6.0 - login local directo
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 var SURL      = 'https://script.google.com/macros/s/AKfycbwXH5R3tFAzwrmRV0CsRGKiuZlHurDhuHnTLIj19D5Q1k2sUwwTqwjnSSl6oFepBVM9/exec';
 var LOCAL_PIN = '1234';
@@ -161,12 +162,7 @@ var TIPOS  = {acto:'Acto inseguro', cond:'Condici\u00f3n insegura', pos:'Reconoc
 var TIPO_B = {acto:'b-acto', cond:'b-cond', pos:'b-pos', cuasi:'b-cuasi'};
 
 // ── LOGIN SETUP ──────────────────────────────────────────────────────────────
-// Si es file://, ocultar el campo PIN - no se puede verificar contra servidor
-if (ON_FILE) {
-  document.getElementById('pin-group').style.display = 'none';
-  document.getElementById('login-note').textContent  = '\u2139\ufe0f Modo local: acceso directo por nombre';
-  document.getElementById('login-note').className    = 'login-note ok';
-}
+// PIN siempre visible - verificado localmente
 
 document.getElementById('btn-ingresar').addEventListener('click', doLogin);
 document.getElementById('inp-lider').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById(ON_FILE?'btn-ingresar':'inp-pin').focus(); });
