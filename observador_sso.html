@@ -206,6 +206,7 @@ textarea{min-height:80px;resize:vertical}
 var _a = JSON.parse(document.getElementById('app-assets').textContent);
 var LOGO = _a.logo;
 var IMGS = _a.imgs;
+var _cbIdx = 0;
 var SURL = 'https://script.google.com/macros/s/AKfycbxKlhBuf5Qe1_fjQHOTKjyBLMA9C-Oj7OM-yYalLONkKdhS5iaOJFpfJuyGrsGaU-8G/exec';
 
 // Set logos
@@ -273,11 +274,18 @@ function doLogin() {
 }
 
 function api(params, cb) {
-  var url = SURL + '?', parts = [];
-  for (var k in params) parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
-  url += parts.join('&');
-  fetch(url).then(function(r){ return r.json(); }).then(function(data){ cb(null,data); }).catch(function(e){ cb(e,null); });
+  var cbName = '_cb' + (++_cbIdx);
+  var url = SURL + '?callback=' + cbName;
+  for (var k in params) url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  window[cbName] = function(data){ cleanup(cbName,sc); cb(null,data); };
+  var sc = document.createElement('script');
+  sc.onerror = function(){ cleanup(cbName,sc); cb(new Error('error'),null); };
+  var tm = setTimeout(function(){ cleanup(cbName,sc); cb(new Error('timeout'),null); },15000);
+  sc.onload = function(){ clearTimeout(tm); };
+  sc.src = url;
+  document.head.appendChild(sc);
 }
+function cleanup(n,el){ delete window[n]; if(el&&el.parentNode) el.parentNode.removeChild(el); }
 
 function updSt() {
   var p = pend.length, online = navigator.onLine;
