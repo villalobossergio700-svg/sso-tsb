@@ -108,7 +108,7 @@ html,body{min-height:100%;background:#f0f2f5;font-family:-apple-system,BlinkMacS
     <div class="login-sub">Gesti&#243;n y seguimiento de tarjetas</div>
     <div class="form-group">
       <label for="inp-lider">Tu nombre completo</label>
-      <input type="text" id="inp-lider" placeholder="Ej: Sergio Villalobos..." autocomplete="name">
+      <input type="text" id="inp-lider" placeholder="Ej: Juan P&#233;rez..." autocomplete="name">
     </div>
     <div class="form-group" id="pin-group">
       <label for="inp-pin">PIN de acceso</label>
@@ -204,13 +204,13 @@ function doLogin() {
 
   api({action:'verificarPin', pin:pin}, function(err, res){
     btn.textContent = 'Ingresar al panel'; btn.disabled = false;
-    if (err || !res) {
-      // Sin conexión: verificar PIN local
+    if (err) {
+      // JSONP timeout o error — usar PIN local como respaldo
       if (pin === LOCAL_PIN) { enterApp(nombre); return; }
-      showToast('\u26a0 Sin conexi\u00f3n al servidor.');
+      showToast('⚠ No se pudo verificar. Verificá el PIN.');
       return;
     }
-    if (!res.ok) { showToast('\u26a0 PIN incorrecto'); return; }
+    if (!res || !res.ok) { showToast('⚠ PIN incorrecto'); return; }
     enterApp(nombre);
   });
 }
