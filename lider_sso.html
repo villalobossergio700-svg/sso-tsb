@@ -225,12 +225,18 @@ function enterApp(nombre) {
 
 // ── API ──────────────────────────────────────────────────────────────────────
 function api(params, cb) {
-  var url = SURL+'?', parts = [];
-  for (var k in params) parts.push(encodeURIComponent(k)+'='+encodeURIComponent(params[k]));
-  url += parts.join('&');
-  fetch(url)
-    .then(function(r){ return r.json(); })
-    .then(function(data){ cb(null, data); })
+  var cbName = '_cb' + (++_cbIdx);
+  var url = SURL + '?callback=' + cbName;
+  for (var k in params) url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  window[cbName] = function(data){ cleanup(cbName,sc); cb(null,data); };
+  var sc = document.createElement('script');
+  sc.onerror = function(){ cleanup(cbName,sc); cb(new Error('error'),null); };
+  var tm = setTimeout(function(){ cleanup(cbName,sc); cb(new Error('timeout'),null); },15000);
+  sc.onload = function(){ clearTimeout(tm); };
+  sc.src = url;
+  document.head.appendChild(sc);
+}
+function cleanup(n,el){ delete window[n]; if(el&&el.parentNode) el.parentNode.removeChild(el); })
     .catch(function(e){ cb(e, null); });
 }
 
